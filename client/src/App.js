@@ -6,9 +6,11 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
-import BinaryChoice from "./components/choice/binary";
+import BinaryChoice from "./components/choice/strip";
 import TrendChoice from "./components/choice/trend";
-
+import BarChoice from "./components/choice/bar";
+import DotPlotChoice from "./components/choice/dotplot";
+import DotPlotChoice2 from "./components/choice/dotplot_alt";
 import "./App.css";
 
 // const App = () => {
@@ -35,6 +37,16 @@ class App extends React.Component {
           ></BinaryChoice>
           <hr />
           <TrendChoice width="500px" height="500px"></TrendChoice>
+          <hr />
+          <BarChoice width="800px" height="500px"></BarChoice>
+          <hr />
+          <DotPlotChoice
+            width="800px"
+            height="500px"
+            maxCircles={20}
+          ></DotPlotChoice>
+          <hr />
+          <DotPlotChoice2 width="800px" height="500px"></DotPlotChoice2>
         </Container>
       </div>
     );
