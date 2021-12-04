@@ -82,26 +82,26 @@ const Dotplot = (props) => {
           .attr("height", h)
           .attr("fill-opacity", 0)
           .attr("stroke", "gray")
-          .attr("stroke-opacity", 0.2)
-          .on("click", () => {
-            bins = d3.range(nBins).map((d, i) => {
-              return {
-                idx: i,
-                bin: [d * binWidth, (d + 1) * binWidth],
-                countCircles: 0,
-              };
-            });
-            update(bins);
-          })
-          .on("mouseover", () => {
-            console.log("rect");
-            update(bins);
-          })
-          .on("mouseout", () => {
-            console.log("rect");
-            console.log(bins);
-            update(bins);
-          });
+          .attr("stroke-opacity", 0.2);
+        // .on("click", () => {
+        //   bins = d3.range(nBins).map((d, i) => {
+        //     return {
+        //       idx: i,
+        //       bin: [d * binWidth, (d + 1) * binWidth],
+        //       countCircles: 0,
+        //     };
+        //   });
+        //   update(bins);
+        // })
+        // .on("mouseover", () => {
+        //   // console.log("rect");
+        //   update(bins);
+        // })
+        // .on("mouseout", () => {
+        //   // console.log("rect");
+        //   // console.log(bins);
+        //   update(bins);
+        // });
 
         // initializing guides guides;
         let bins = d3.range(nBins).map((d, i) => {
@@ -109,6 +109,16 @@ const Dotplot = (props) => {
             idx: i,
             bin: [d * binWidth, (d + 1) * binWidth],
             countCircles: 0,
+            temp: false,
+          };
+        });
+
+        let tempBins = d3.range(nBins).map((d, i) => {
+          return {
+            idx: i,
+            bin: [d * binWidth, (d + 1) * binWidth],
+            countCircles: 0,
+            temp: true,
           };
         });
 
@@ -122,8 +132,7 @@ const Dotplot = (props) => {
             return `translate(${xScale((d.bin[0] + d.bin[1]) / 2)}, ${h})`;
           })
           .on("mouseout", function (d) {
-            console.log("out");
-            console.log(bins);
+            // tempBins = bins;
             update(bins);
           });
 
@@ -159,7 +168,8 @@ const Dotplot = (props) => {
             return d3.range(maxCircles - d.countCircles);
           })
           .join("circle")
-          .attr("fill-opacity", 0)
+          .attr("fill-opacity", 0.3)
+          .attr("fill", "white")
           .attr("stroke", "grey")
           .attr("stroke-opacity", 0.5)
           .attr("r", circleRadius)
@@ -168,7 +178,8 @@ const Dotplot = (props) => {
             // console.log(yScale(d));
             return -d * 2 * circleRadius - circleRadius;
           })
-          .on("mouseover", mouseover)
+          .on("mouseenter", mouseover)
+          .on("mouseout", mouseout)
           .on("click", click);
 
         // const focusRect = dotplotContainer
@@ -184,39 +195,48 @@ const Dotplot = (props) => {
 
         update(bins);
 
-        function update(bins) {
-          //   console.log(bins);
-          binGs.data(bins);
+        function update(data) {
+          // console.log(data);
+          // console.log(tempBins);
+          binGs.data(data);
+
           let dotsUpdate = binGs
             .selectAll("circle")
             .data(function (d) {
               //   console.log(d);
               return d3.range(d.countCircles);
             })
-            .attr("fill", function (d) {
+            .attr("fill", function (d, i) {
               let parentData = this.parentNode.__data__;
-              console.log(parentData.temp);
-              if (parentData.temp) {
+              // console.log(parentData.temp);
+              // console.log(parentData);
+              // if (parentData.temp) {
+              //   return "orange";
+              // } else {
+              //   return "grey";
+              // }
+              if (i > bins[parentData.idx].countCircles - 1) {
                 return "orange";
               } else {
                 return "grey";
               }
             });
-          // .attr("fill", (d) => {
-          //   return "orange";
-          // });
 
           let dotsEnter = dotsUpdate
             .enter()
             .append("circle")
-            .attr("fill", function (d) {
+            .attr("fill", function (d, i) {
               let parentData = this.parentNode.__data__;
-              console.log(parentData.temp);
-              if (parentData.temp) {
+              if (i > bins[parentData.idx].countCircles - 1) {
                 return "orange";
               } else {
-                return "grey";
+                return "lightgrey";
               }
+              // if (parentData.temp) {
+              //   return "orange";
+              // } else {
+              //   return "grey";
+              // }
             })
             .attr("fill-opacity", 1)
             .attr("r", circleRadius)
@@ -232,20 +252,37 @@ const Dotplot = (props) => {
           dotsEnter.merge(dotsUpdate);
 
           // dotGuides
-          guideBinGs.data(bins);
+          guideBinGs.data(data);
 
-          let sumCircles = bins.reduce((pv, cv) => {
+          let sumCircles = data.reduce((pv, cv) => {
             return pv + cv.countCircles;
           }, 0);
 
-          let guideUpdate = guideBinGs.selectAll("circle").data(function (d) {
-            return d3.range(maxCircles - sumCircles + d.countCircles);
-          });
+          let guideUpdate = guideBinGs
+            .selectAll("circle")
+            .data(function (d) {
+              let circleIdxs = d3.range(
+                maxCircles - sumCircles + d.countCircles
+              );
+              return circleIdxs;
+            })
+            .attr("fill", function (d, i) {
+              let parentData = this.parentNode.__data__;
+              console.log(parentData);
+              if (i > bins[parentData.idx].countCircles - 1) {
+                return "white";
+              } else {
+                return "grey";
+              }
+              // return "white";
+            });
 
           let guideEnter = guideUpdate
             .enter()
             .append("circle")
-            .attr("fill-opacity", 0)
+            // .attr("fill-opacity", 0)
+            .attr("fill-opacity", 0.3)
+            .attr("fill", "white")
             .attr("stroke", "grey")
             .attr("stroke-opacity", 0.5)
             .attr("r", circleRadius)
@@ -254,7 +291,8 @@ const Dotplot = (props) => {
               // console.log(yScale(d));
               return -d * 2 * circleRadius - circleRadius;
             })
-            .on("mouseover", mouseover)
+            .on("mouseenter", mouseover)
+            .on("mouseout", mouseout)
             .on("click", click);
 
           guideUpdate.exit().remove();
@@ -265,20 +303,40 @@ const Dotplot = (props) => {
         function mouseover(d) {
           let currentIndex = d;
           let parentData = this.parentNode.__data__;
-          let binsCopy = JSON.parse(JSON.stringify(bins));
-          binsCopy[parentData.idx].countCircles = currentIndex + 1;
-          binsCopy[parentData.idx].temp = true;
+          // tempBins = JSON.parse(JSON.stringify(bins));
+          tempBins[parentData.idx].countCircles = currentIndex + 1;
+          tempBins[parentData.idx].temp = true;
           // console.log(binsCopy);
-          update(binsCopy);
+          update(tempBins);
           //   line.attr("x1", coords[0]).attr("x2", coords[0]);
+        }
+
+        function mouseout(d) {
+          console.log("out");
+          let currentIndex = d;
+          let parentData = this.parentNode.__data__;
+          // let binsCopy = JSON.parse(JSON.stringify(bins));
+          let oldNumber = bins[parentData.idx].countCircles;
+          tempBins[parentData.idx].countCircles = oldNumber;
+          tempBins[parentData.idx].temp = false;
+          // console.log(binsCopy);
+          update(tempBins);
         }
 
         function click(d) {
           let currentIndex = d;
           let parentData = this.parentNode.__data__;
-          bins[parentData.idx].countCircles = currentIndex + 1;
+          if (
+            bins[parentData.idx].countCircles ===
+            tempBins[parentData.idx].countCircles
+          ) {
+            bins[parentData.idx].countCircles = 0;
+          } else {
+            // bins[parentData.idx].countCircles = 0;
+            bins[parentData.idx].countCircles = currentIndex + 1;
+          }
+
           bins[parentData.idx].temp = false;
-          console.log("click");
           update(bins);
           //   console.log(x);
         }

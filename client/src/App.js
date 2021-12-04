@@ -38,7 +38,19 @@ class App extends React.Component {
           <hr />
           <TrendChoice width="500px" height="500px"></TrendChoice>
           <hr />
-          <BarChoice width="800px" height="500px"></BarChoice>
+          <BarChoice
+            width="800px"
+            height="500px"
+            maintainMaxCount={true}
+            showGuidelines={true}
+          ></BarChoice>
+          <hr />
+          <BarChoice
+            width="800px"
+            height="500px"
+            maintainMaxCount={false}
+            showGuidelines={false}
+          ></BarChoice>
           <hr />
           <DotPlotChoice
             width="800px"

@@ -7,6 +7,7 @@ const TrendChoice = (props) => {
   const d3Container = useRef(null);
   const width = props.width || "100%";
   const height = props.height || "100%";
+  console.log(props);
 
   useEffect(
     () => {
@@ -33,14 +34,14 @@ const TrendChoice = (props) => {
 
         const yType = props.yTpe || d3.scaleLinear;
 
-        const maintainMaxSum = props.maintainMaxCount || true;
-        const showGuidelines = props.showGuidelines || true;
+        const maintainMaxSum = props.maintainMaxCount;
+        const showGuidelines = props.showGuidelines;
 
         const title = props.title || "";
         const yLabel = props.yLabel || "";
         const color = props.color || "grey";
 
-        const categories = props.categories || ["A", "B", "C", "D"];
+        const categories = props.categories || ["A", "B", "C", "D", "E"];
 
         const xDomain = categories;
         const maxYValue = props.maxValue || 100;
@@ -100,7 +101,13 @@ const TrendChoice = (props) => {
         const guide = g
           .append("g")
           .attr("fill", "lightgrey")
-          .attr("fill-opacity", 0.5)
+          .attr("fill-opacity", function (d) {
+            if (showGuidelines) {
+              return 0.5;
+            } else {
+              return 0;
+            }
+          })
           .selectAll("rect")
           .data(guideData)
           .join("rect")
@@ -113,6 +120,7 @@ const TrendChoice = (props) => {
         const bar = g
           .append("g")
           .attr("fill", color)
+
           .selectAll("rect")
           .data(data)
           .join("rect")
@@ -207,17 +215,20 @@ const TrendChoice = (props) => {
             focus.style("fill-opacity", 0);
             let guideData = calculateGuideData();
             let choice = yScale.invert(m[1]);
-            choice =
-              choice <= guideData[focusIndex][1]
-                ? choice
-                : guideData[focusIndex][1];
+            if (maintainMaxSum) {
+              choice =
+                choice <= guideData[focusIndex][1]
+                  ? choice
+                  : guideData[focusIndex][1];
 
-            guide
-              .data(guideData)
-              .attr("x", (d) => xScale(d[0]))
-              .attr("y", (d) => yScale(d[1]))
-              .attr("height", (d) => yScale(0) - yScale(d[1]))
-              .attr("width", xScale.bandwidth());
+              guide
+                .data(guideData)
+                .attr("x", (d) => xScale(d[0]))
+                .attr("y", (d) => yScale(d[1]))
+                .attr("height", (d) => yScale(0) - yScale(d[1]))
+                .attr("width", xScale.bandwidth());
+            }
+
             data[focusIndex][1] = choice;
 
             if (maintainMaxSum) {
@@ -248,7 +259,6 @@ const TrendChoice = (props) => {
               }
               //   console.log(sum);
             }
-
             bar
               .data(data)
               .attr("fill", (d, i) => {

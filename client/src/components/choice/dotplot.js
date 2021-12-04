@@ -160,7 +160,8 @@ const Dotplot = (props) => {
             })
             .attr("fill", (d) => {
               return d.color;
-            });
+            })
+            .style("pointer-events", "none");
 
           const dotsExit = dotsUpdate.exit().remove();
 

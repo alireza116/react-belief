@@ -37,7 +37,7 @@ const TrendChoice = (props) => {
         const w = width - margins.left - margins.right;
         const h = height - margins.top - margins.bottom;
 
-        const xDomain = props.xDomain || [-1, 1];
+        const xDomain = props.xDomain || [-5.0, 5.0];
         const yDomain = props.yDomain || [-1, 1];
 
         console.log(w);
@@ -64,14 +64,20 @@ const TrendChoice = (props) => {
           .append("g")
           .attr("transform", `translate(${0},${h / 2})`)
           .attr("class", "xAxis")
-          .call(d3.axisBottom(xScale).tickValues([-1, 1]))
+          .call(
+            d3.axisBottom(xScale)
+            // .tickValues([-1, 1])
+          )
           .attr("pointer-events", "none")
           .style("font-size", "12px");
 
         let yAxis = g
           .append("g")
           .attr("transform", `translate(${w / 2},${0})`)
-          .call(d3.axisLeft(yScale).tickValues([-1, 1]))
+          .call(
+            d3.axisLeft(yScale)
+            // .tickValues([-1, 1])
+          )
           .attr("pointer-events", "none")
           .style("font-size", "12px");
 
@@ -99,15 +105,15 @@ const TrendChoice = (props) => {
           .attr("clip-path", "url(#clipRect)")
           .style("pointer-events", "none");
 
-        let bCI;
-        let sampleBs;
-        let mCI;
-        let sampleMs;
-
         //slope
         let m = 0;
         //intercept
         let b = 0;
+
+        let bCI;
+        let sampleBs = [b];
+        let mCI;
+        let sampleMs = [m];
 
         let [x1, x2, y1, y2] = getLineCoords(m, b);
 
